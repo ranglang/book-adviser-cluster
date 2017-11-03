@@ -1,8 +1,8 @@
-import fcluster.bookAdvisor
+import fcluster.bookAdviserSubscriber
 
 object bookAdvisorApp {
 
   def main(args: Array[String]): Unit = {
-     bookAdvisor.main(args)
+    bookAdviserSubscriber.main(args(0))
   }
 }
