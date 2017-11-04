@@ -9,10 +9,10 @@ object bookAdviserPublisher {
 
   case class Book(title: String, actorName :String,  content: String)
 
-  case class PublishBook(Book)
+  case class PublishBook(book: Book)
 
   def main(args: String) = {
-    val port = if (args.isEmpty) "0" else port
+    val port = if (args.isEmpty) "0" else args
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port")
       .withFallback(ConfigFactory.load())
     val actorSystem = ActorSystem("book-advisor-system-1", config)

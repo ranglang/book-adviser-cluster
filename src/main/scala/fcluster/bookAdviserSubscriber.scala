@@ -7,8 +7,8 @@ import akka.cluster.pubsub.DistributedPubSubMediator.{SubscribeAck, Subscribe, U
 import com.typesafe.config.ConfigFactory
 
 object bookAdviserSubscriber {
-  def main(args: Array[String]) = {
-    val port = if (args.isEmpty) "0" else args(0)
+  def main(args: String) = {
+    val port = if (args.isEmpty) "0" else args
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port")
       .withFallback(ConfigFactory.load())
     val actorSystem = ActorSystem("book-advisor-system-1", config)
@@ -36,14 +36,14 @@ class bookAdviserSubscriber extends Actor with ActorLogging {
     .orElse[Any, Unit](receiveSubscription)
 
   def receiveClusterEvents: Receive = {
-     case event: MemberEvent => log.info(event.getClass.getSimpleName + "--->" +event.member)
+     case event: MemberEvent => log.info(s"${event.getClass.getSimpleName} ---> ${event.member}")
   }
 
   def receiveSubscription: Receive = {
     case SubscribeAck(subscribe) =>
-      log.info("Actor: " + subscribe.ref + " subscribed to: " +  subscribe.topic)
+      log.info(s"Actor: ${subscribe.ref} unsubscribed to: ${subscribe.topic}")
     case UnsubscribeAck(unsubscribe) =>
-      log.info("Actor: " +  unsubscribe.ref " unsubscribed to: " +  unsubscribe.topic)
+      log.info(s"Actor: ${unsubscribe.ref} unsubscribed to: ${unsubscribe.topic}")
   }
 
 }
