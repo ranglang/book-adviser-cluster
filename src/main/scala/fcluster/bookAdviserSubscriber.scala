@@ -7,11 +7,11 @@ import akka.cluster.pubsub.DistributedPubSubMediator.{SubscribeAck, Subscribe, U
 import com.typesafe.config.ConfigFactory
 
 object bookAdviserSubscriber {
-  def main(args: String) = {
-    val port = if (args.isEmpty) "0" else args
+  def main(port: String) = {
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port")
+      .withFallback(ConfigFactory.parseString("akka.cluster.role = [subscriber]"))
       .withFallback(ConfigFactory.load())
-    val actorSystem = ActorSystem("book-advisor-system-1", config)
+    val actorSystem = ActorSystem("book-advisor-systems", config)
     actorSystem.actorOf(Props[bookAdviserSubscriber], name = "book-advisor-subscriber")
   }
 }
@@ -22,28 +22,6 @@ class bookAdviserSubscriber extends Actor with ActorLogging {
   val cluster = Cluster(context.system)
   val mediator = DistributedPubSub(context.system).mediator
 
-  override def preStart(): Unit = {
-    mediator ! Subscribe("readers", self)
-    cluster.subscribe(self, initialStateMode = InitialStateAsEvents, classOf[MemberEvent])
-  }
-
-  override def postStop(): Unit = {
-    mediator ! Unsubscribe("readers", self)
-    cluster.unsubscribe(self)
-  }
-
-  override def receive = receiveClusterEvents
-    .orElse[Any, Unit](receiveSubscription)
-
-  def receiveClusterEvents: Receive = {
-     case event: MemberEvent => log.info(s"${event.getClass.getSimpleName} ---> ${event.member}")
-  }
-
-  def receiveSubscription: Receive = {
-    case SubscribeAck(subscribe) =>
-      log.info(s"Actor: ${subscribe.ref} unsubscribed to: ${subscribe.topic}")
-    case UnsubscribeAck(unsubscribe) =>
-      log.info(s"Actor: ${unsubscribe.ref} unsubscribed to: ${unsubscribe.topic}")
-  }
+  override def receive = ???
 
 }
