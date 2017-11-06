@@ -1,7 +1,8 @@
 package fcluster
 
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Cancellable, Props}
+import akka.actor.{Actor, ActorLogging, ActorPath, ActorRef, ActorSystem, Cancellable, Props}
 import akka.cluster.Cluster
+import akka.cluster.client.{ClusterClient, ClusterClientSettings}
 import akka.cluster.pubsub.DistributedPubSubMediator
 import com.typesafe.config.ConfigFactory
 
@@ -28,8 +29,16 @@ class BookAdviserPublisher extends Actor with ActorLogging {
   import scala.concurrent.duration._
   import akka.cluster.pubsub.DistributedPubSub
 
-  val cluster = Cluster(context.system)
-  val mediator: ActorRef = DistributedPubSub(context.system).mediator
+  val actorSystem: ActorSystem = context.system
+  val cluster = Cluster(actorSystem)
+  val mediator: ActorRef = DistributedPubSub(actorSystem).mediator
+
+  val initialContacts = Set(
+    ActorPath.fromString("akka.tcp://cluster-system-2@127.0.0.1:2561/system/receptionist")
+  )
+
+  val clusterClient: ActorRef = actorSystem.actorOf(ClusterClient.props(
+    ClusterClientSettings(actorSystem).withInitialContacts(initialContacts)))
 
   val r = scala.util.Random
   val book = Book(title = "La caverna", content = "...")
@@ -47,6 +56,7 @@ class BookAdviserPublisher extends Actor with ActorLogging {
   def receivePublish: Receive = {
     case PublishAdvise(advise) =>
       mediator ! DistributedPubSubMediator.Publish("book-advise", advise)
+      clusterClient ! ClusterClient.Publish("book-advise", advise)
   }
 
 }

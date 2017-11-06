@@ -20,10 +20,10 @@ object ExternalBookAdviserSubscriber {
 
 
 class ExternalBookAdviserSubscriber extends Actor with ActorLogging {
+  val actorSystem: ActorSystem = context.system
+  val cluster = Cluster(actorSystem)
 
-  val cluster = Cluster(context.system)
-
-  val replicator: ActorRef = DistributedData(context.system).replicator
+  val replicator: ActorRef = DistributedData(actorSystem).replicator
 
   val advisesKey: GSetKey[Advise] = GSetKey[Advise]("book-advises-key")
 

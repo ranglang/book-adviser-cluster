@@ -2,6 +2,7 @@ package scluster
 
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Cancellable, Props}
 import akka.cluster.Cluster
+import akka.cluster.client.ClusterClientReceptionist
 import akka.cluster.ddata.Replicator.{Update, UpdateResponse, UpdateSuccess, WriteAll}
 import akka.cluster.ddata.{DistributedData, GSet, GSetKey}
 import com.typesafe.config.ConfigFactory
@@ -28,26 +29,24 @@ class ExternalBookAdviserPublisher extends Actor with ActorLogging {
 
   import ExternalBookAdviserPublisher._
 
-  val cluster = Cluster(context.system)
-
+  val actorSystem: ActorSystem = context.system
+  val cluster = Cluster(actorSystem)
   val advisesKey: GSetKey[Advise] = GSetKey[Advise]("book-advises-key")
 
-  val replicator: ActorRef = DistributedData(context.system).replicator
+  ClusterClientReceptionist(actorSystem).registerSubscriber("book-advise", self)
 
-  val r = scala.util.Random
-  val book = Book(title = "La caverna", content = "...")
+  val replicator: ActorRef = DistributedData(actorSystem).replicator
 
-  val tickTask: Cancellable = context.system.scheduler.schedule(1.seconds, 3.seconds) {
-    self ! PublishAdvise(Advise(book, r.nextInt(10)))
-  }(context.dispatcher)
+  override def postStop(): Unit = {
+    ClusterClientReceptionist(context.system).unregisterSubscriber("book-advise", self)
+  }
 
   override def receive: Receive = receivePublishAdvise
 
-  def receivePublishAdvise: Receive = {
-    case PublishAdvise(advise: Advise) =>
-      replicator ! Update(advisesKey, GSet.empty[Advise], writeConsistency) {
-        data => data + advise
-      }
+  private def receivePublishAdvise: Receive = {
+    case advise: Advise =>
+      replicator ! Update(advisesKey, GSet.empty[Advise], writeConsistency)(
+        data => data + advise)
     case _: UpdateResponse[Advise] => Unit
   }
 }

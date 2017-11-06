@@ -21,8 +21,9 @@ class BookAdviserSubscriber extends Actor with ActorLogging {
   import akka.cluster.pubsub.DistributedPubSub
   import BookAdviserPublisher.Advise
 
-  val cluster = Cluster(context.system)
-  val mediator: ActorRef = DistributedPubSub(context.system).mediator
+  val actorSystem: ActorSystem = context.system
+  val cluster = Cluster(actorSystem)
+  val mediator: ActorRef = DistributedPubSub(actorSystem).mediator
 
   mediator ! Subscribe("book-advise", self)
 
@@ -30,9 +31,9 @@ class BookAdviserSubscriber extends Actor with ActorLogging {
     mediator ! Unsubscribe("book-advise", self)
   }
 
-  override def receive = receiveSubscription
+  override def receive: Receive = receiveSubscription
 
-  def receiveSubscription: Receive = {
+  private def receiveSubscription: Receive = {
     case SubscribeAck(Subscribe("book-advise", None, `self`)) =>
       log.info("------->Subscr¡bing...")
     case advise: Advise =>
