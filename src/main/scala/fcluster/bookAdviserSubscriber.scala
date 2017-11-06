@@ -1,27 +1,28 @@
 package fcluster
 
-import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.cluster.Cluster
-import akka.cluster.pubsub.DistributedPubSubMediator.{Unsubscribe, Subscribe, SubscribeAck}
+import akka.cluster.pubsub.DistributedPubSubMediator.{Subscribe, SubscribeAck, Unsubscribe}
 import com.typesafe.config.ConfigFactory
 
-object bookAdviserSubscriber {
+object BookAdviserSubscriber {
 
   def main(port: String) = {
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port")
       .withFallback(ConfigFactory.parseString("akka.cluster.roles = [subscriber]"))
-      .withFallback(ConfigFactory.load())
-    val actorSystem = ActorSystem("cluster-system", config)
-    actorSystem.actorOf(Props[bookAdviserSubscriber], name = "subscriber")
+      .withFallback(ConfigFactory.load("fcluster"))
+    val actorSystem = ActorSystem("cluster-system-1", config)
+    actorSystem.actorOf(Props[BookAdviserSubscriber], name = "subscriber")
   }
 }
 
-class bookAdviserSubscriber extends Actor with ActorLogging {
+class BookAdviserSubscriber extends Actor with ActorLogging {
+
   import akka.cluster.pubsub.DistributedPubSub
-  import bookAdviserPublisher.Advise
+  import BookAdviserPublisher.Advise
 
   val cluster = Cluster(context.system)
-  val mediator = DistributedPubSub(context.system).mediator
+  val mediator: ActorRef = DistributedPubSub(context.system).mediator
 
   mediator ! Subscribe("book-advise", self)
 
@@ -32,9 +33,9 @@ class bookAdviserSubscriber extends Actor with ActorLogging {
   override def receive = receiveSubscription
 
   def receiveSubscription: Receive = {
-   case SubscribeAck(Subscribe("book-advise", None, `self`))  =>
-     log.info("------->Subscr¡bing...")
-   case advise: Advise =>
+    case SubscribeAck(Subscribe("book-advise", None, `self`)) =>
+      log.info("------->Subscr¡bing...")
+    case advise: Advise =>
       log.info(s"Advise ----> Book: ${advise.book} grade: ${advise.grade}")
   }
 

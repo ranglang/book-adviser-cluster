@@ -1,10 +1,14 @@
 import fcluster._
+import scluster.{ExternalBookAdviserPublisher, ExternalBookAdviserSubscriber}
 
-object bookAdviserApp {
+object BookAdviserApp {
 
   def main(args: Array[String]): Unit = {
-    bookAdviserPublisher.main("2551")
-    bookAdviserSubscriber.main("2552")
-    bookAdviserSubscriber.main("2553")
+//    BookAdviserPublisher.main("2551")
+//    BookAdviserSubscriber.main("2552")
+//    BookAdviserSubscriber.main("2553")
+      ExternalBookAdviserPublisher.main("2561")
+      ExternalBookAdviserSubscriber.main("2562")
+
   }
 }
