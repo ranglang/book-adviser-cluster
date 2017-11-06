@@ -9,10 +9,10 @@ import com.typesafe.config.ConfigFactory
 object bookAdviserSubscriber {
   def main(port: String) = {
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port")
-      .withFallback(ConfigFactory.parseString("akka.cluster.role = [subscriber]"))
+      .withFallback(ConfigFactory.parseString("akka.cluster.roles = [subscriber]"))
       .withFallback(ConfigFactory.load())
-    val actorSystem = ActorSystem("book-advisor-systems", config)
-    actorSystem.actorOf(Props[bookAdviserSubscriber], name = "book-advisor-subscriber")
+    val actorSystem = ActorSystem("cluster-system", config)
+    actorSystem.actorOf(Props[bookAdviserSubscriber], name = "subscriber")
   }
 }
 
