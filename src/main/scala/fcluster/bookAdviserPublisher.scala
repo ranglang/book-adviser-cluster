@@ -18,8 +18,7 @@ object bookAdviserPublisher {
       withFallback(ConfigFactory.parseString("akka.cluster.roles = [publisher]")).
       withFallback(ConfigFactory.load())
     val actorSystem = ActorSystem("cluster-system", config)
-    actorSystem.actorOf(bookAdviserPublisher.props,
-      name = "publisher")
+    actorSystem.actorOf(bookAdviserPublisher.props, name = "publisher")
   }
 }
 
@@ -34,7 +33,7 @@ class bookAdviserPublisher extends Actor with ActorLogging {
   val r = scala.util.Random
   val book = Book(title = "La caverna", content = "...")
 
-  val tickTask = context.system.scheduler.schedule(10.seconds, 3.seconds){
+  val tickTask = context.system.scheduler.schedule(1.seconds, 3.seconds){
     self ! PublishAdvise(Advise(book, r.nextInt(10)))
   }(context.dispatcher)
 
@@ -46,8 +45,7 @@ class bookAdviserPublisher extends Actor with ActorLogging {
 
   def receivePublish: Receive= {
     case PublishAdvise(advise) =>
-      log.info("-------->" + advise)
-      mediator ! DistributedPubSubMediator.Publish("bookAdvise", advise)
+      mediator ! DistributedPubSubMediator.Publish("book-advise", advise)
   }
 
 }
