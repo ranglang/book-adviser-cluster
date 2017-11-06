@@ -1,5 +1,5 @@
 import fcluster._
-import scluster.{ExternalBookAdviserPublisher, ExternalBookAdviserSubscriber}
+import scluster._
 
 object BookAdviserApp {
 
