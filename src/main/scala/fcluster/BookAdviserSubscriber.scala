@@ -12,7 +12,7 @@ object BookAdviserSubscriber {
       .withFallback(ConfigFactory.parseString("akka.cluster.roles = [subscriber]"))
       .withFallback(ConfigFactory.load("fcluster"))
     val actorSystem = ActorSystem("cluster-system-1", config)
-    actorSystem.actorOf(Props[BookAdviserSubscriber], name = "subscriber")
+    actorSystem.actorOf(props = Props[BookAdviserSubscriber], name = "subscriber")
   }
 }
 

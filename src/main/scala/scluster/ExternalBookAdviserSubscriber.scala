@@ -14,7 +14,7 @@ object ExternalBookAdviserSubscriber {
       withFallback(ConfigFactory.parseString("akka.cluster.roles = [external-subscriber]")).
       withFallback(ConfigFactory.load("scluster"))
     val actorSystem = ActorSystem("cluster-system-2", config)
-    actorSystem.actorOf(Props[ExternalBookAdviserSubscriber])
+    actorSystem.actorOf(props = Props[ExternalBookAdviserSubscriber])
   }
 }
 

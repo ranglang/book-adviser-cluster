@@ -19,7 +19,7 @@ object BookAdviserPublisher {
       withFallback(ConfigFactory.parseString("akka.cluster.roles = [publisher]")).
       withFallback(ConfigFactory.load("fcluster"))
     val actorSystem = ActorSystem("cluster-system-1", config)
-    actorSystem.actorOf(Props[BookAdviserPublisher], name = "publisher")
+    actorSystem.actorOf(props = Props[BookAdviserPublisher], name = "publisher")
   }
 }
 
@@ -43,7 +43,7 @@ class BookAdviserPublisher extends Actor with ActorLogging {
   val r = scala.util.Random
   val book = Book(title = "La caverna", content = "...")
 
-  val tickTask: Cancellable = context.system.scheduler.schedule(1.seconds, 3.seconds) {
+  val tickTask: Cancellable = context.system.scheduler.schedule(1.seconds, 6.seconds) {
     self ! PublishAdvise(Advise(book, r.nextInt(10)))
   }(context.dispatcher)
 
