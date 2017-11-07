@@ -1,5 +1,5 @@
 # BookAdviser
-This is a basic project aimed at learning about Akka
+This is a basic project aimed at learning about Akka Cluster
 
 This small program starts two clusters which a Publisher publishs advises about
 books and those interested subscribes to them.
