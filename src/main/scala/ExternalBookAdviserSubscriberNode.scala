@@ -1,8 +1,8 @@
-import scluster.ExternalBookAdviserPublisher
+import scluster.ExternalBookAdviserSubscriber
 
 object ExternalBookAdviserSubscriberNode {
 
   def main(args: Array[String]): Unit = {
-    ExternalBookAdviserPublisher.main(args(0))
+    ExternalBookAdviserSubscriber.main(args(0))
   }
 }
