@@ -35,7 +35,7 @@ class BookAdviserSubscriber extends Actor with ActorLogging {
 
   private def receiveSubscription: Receive = {
     case SubscribeAck(Subscribe("book-advise", None, `self`)) =>
-      log.info("------->Subscr¡bing...")
+      log.info("------->Subscribing...")
     case advise: Advise =>
       log.info(s"Advise ----> Book: ${advise.book} grade: ${advise.grade}")
   }
