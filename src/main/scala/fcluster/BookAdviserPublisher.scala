@@ -15,10 +15,12 @@ object BookAdviserPublisher {
   case class PublishAdvise(advise: Advise)
 
   def main(port: String) = {
+
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port").
       withFallback(ConfigFactory.parseString("akka.cluster.roles = [publisher]")).
-      withFallback(ConfigFactory.load("fcluster"))
-    val actorSystem = ActorSystem("cluster-system-1", config)
+      withFallback(ConfigFactory.load("pcluster"))
+
+    val actorSystem = ActorSystem("publish-system-1", config)
     actorSystem.actorOf(props = Props[BookAdviserPublisher], name = "publisher")
   }
 }
@@ -34,7 +36,7 @@ class BookAdviserPublisher extends Actor with ActorLogging {
   val mediator: ActorRef = DistributedPubSub(actorSystem).mediator
 
   val initialContacts = Set(
-    ActorPath.fromString("akka.tcp://cluster-system-2@127.0.0.1:2561/system/receptionist")
+    ActorPath.fromString("akka.tcp://subscribe-cluster-system@127.0.0.1:2561/system/receptionist")
   )
 
   val clusterClient: ActorRef = actorSystem.actorOf(ClusterClient.props(

@@ -10,8 +10,8 @@ object BookAdviserSubscriber {
   def main(port: String) = {
     val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port")
       .withFallback(ConfigFactory.parseString("akka.cluster.roles = [subscriber]"))
-      .withFallback(ConfigFactory.load("fcluster"))
-    val actorSystem = ActorSystem("cluster-system-1", config)
+      .withFallback(ConfigFactory.load("scluster"))
+    val actorSystem = ActorSystem("subscribe-cluster-system", config)
     actorSystem.actorOf(props = Props[BookAdviserSubscriber], name = "subscriber")
   }
 }
